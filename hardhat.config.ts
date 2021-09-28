@@ -86,7 +86,7 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       url: createInfuraRpcUrl("kovan"),
-      chainId: chainIds.hardhat,
+      chainId: chainIds.kovan,
       tags: ["stage"],
     },
     rinkeby: {
@@ -94,7 +94,7 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       url: createInfuraRpcUrl("rinkeby"),
-      chainId: chainIds.hardhat,
+      chainId: chainIds.rinkeby,
       tags: ["stage"],
     },
     ropsten: {
@@ -102,7 +102,7 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       url: createInfuraRpcUrl("ropsten"),
-      chainId: chainIds.hardhat,
+      chainId: chainIds.ropsten,
       tags: ["stage"],
     },
     polygon: {
@@ -110,7 +110,7 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       url: createInfuraRpcUrl("polygonmainnet"),
-      chainId: chainIds.hardhat,
+      chainId: chainIds.polygonmainnet,
       tags: ["prod"],
     },
     mumbai: {
@@ -118,7 +118,7 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       url: createInfuraRpcUrl("polygonmumbai"),
-      chainId: chainIds.hardhat,
+      chainId: chainIds.polygonmumbai,
       tags: ["stage"],
     },
   },
