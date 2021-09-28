@@ -27,8 +27,11 @@ contract PaymentBridge is Initializable {
    /// @dev dai address
    address public daiAddress;
 
-   /// @dev weth
+   /// @dev weth address
    IWETH public weth;
+
+   /// @dev event fired when a new payment bridge is created
+   event Payment(address indexed token, address indexed payer, address indexed recipient, uint256 amount);
    function __PaymentBridge_init_unchained(address _treasuryAddress, address _wrapAndZap, address _omnnibrigeAddress, address _xdaibridgeAddress, address _daiAddress, address _wethAddress) internal initializer{
        treasuryAddress = _treasuryAddress;
        wrapAndZapAddress = _wrapAndZap;
@@ -75,9 +78,12 @@ contract PaymentBridge is Initializable {
             // Does passing the ERC 20 directly work?
             IOminiBridge(omnnibrigeAddress).relayTokens(tokenAddress, _recipientAddress, _amount);
         }
+        emit Payment(tokenAddress, msg.sender, _recipientAddress, _amount);
     }
 }
 
-// Setup IWETH stuff
+// + Setup IWETH stuff
 // Set up subgraph
+// Deploy to kovan and sokol
 // Write tests
+
