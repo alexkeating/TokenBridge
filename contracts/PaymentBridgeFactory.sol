@@ -66,7 +66,7 @@ contract PaymentBridgeFactory is Initializable {
         require(template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
         // send money to payment bridge
         // TODO: does there need to be an approval above this
-        PaymentBridge(payeeBridge).pay(feeAmount);
+        PaymentBridge(payeeBridge).pay(feeAmount, address(0));
         clone(_initData);
     }
     // totalBridges
