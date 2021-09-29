@@ -52,14 +52,7 @@ contract PaymentBridge is Initializable {
         __PaymentBridge_init_unchained(_treasuryAddress, _wrapAndZap, _omnibridgeAddress, _xdaibridgeAddress, _daiAddress, _weth);
     }
 
-    // initialize with the below variables
-    // - DAO treasury address
-    // - wrapnzap address if moloch
-
-    // Two paths
-    // - regular erc20 or Eth use omnibridge
-    //   - If Eth make sure to wrap it when sending
-    // - If xdai use the xdai bridge  
+  
     function pay(uint256 _amount, address tokenAddress) external payable {
         address _recipientAddress = tokenAddress;
         if (wrapAndZapAddress != address(0)) {
@@ -75,15 +68,8 @@ contract PaymentBridge is Initializable {
 
         IERC20Upgradeable _token = IERC20Upgradeable(tokenAddress);
         _token.transferFrom(msg.sender, address(this), _amount);
-        // token address amount
-        // convert to an ERC20 check if DAI
-        //
-        // Get omnibridge 
-        // Get xdai Bridge
-        // tell if a n ERC20 is from xDAI
         if (tokenAddress == daiAddress) {
             _approveBridge(_token, xdaibridgeAddress, _amount);
-            // Approve will approve this contract as a spender
             IOminiBridge(xdaibridgeAddress).relayTokens(tokenAddress, _recipientAddress, _amount);
         } else {
             // Does passing the ERC 20 directly work?
@@ -99,9 +85,3 @@ contract PaymentBridge is Initializable {
         } 
     }
 }
-
-// + Setup IWETH stuff
-// Set up subgraph
-// Deploy to kovan and sokol
-// Write tests
-

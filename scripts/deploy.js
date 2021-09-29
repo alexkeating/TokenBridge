@@ -16,8 +16,10 @@ const main = async () => {
     const plazaBridge = await ethers.getContractFactory("PaymentBridge");
     console.log('Deploying Plaza bridge...');
     const deployedBridge = await plazaBridge.deploy()
-    console.log('Intializing plaza bridge...');
-    await deployedBridge.initialize(config.treasuryAddress, config.wrapAndZapAddresss, config.omnibridgeAddress, config.xdaibridgfeAddress, config.daiAddress, config.wethAddress);
+    console.log(`Intializing plaza bridge...${deployedBridge}`);
+    console.log(config);
+    console.log(config.treasuryAddress, config.wrapAndZapAddress, config.omnibridgeAddress, config.xdaibridgeAddress, config.daiAddress, config.wethAddress)
+    await deployedBridge.initialize(config.treasuryAddress, config.wrapAndZapAddress, config.omnibridgeAddress, config.xdaibridgeAddress, config.daiAddress, config.wethAddress);
 
     const plazeBridgeTemplate = await ethers.getContractFactory("PaymentBridge");
     console.log('Deploying bridge template...');
