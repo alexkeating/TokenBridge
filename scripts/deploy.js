@@ -20,6 +20,7 @@ const main = async () => {
     console.log(config);
     console.log(config.treasuryAddress, config.wrapAndZapAddress, config.omnibridgeAddress, config.xdaibridgeAddress, config.daiAddress, config.wethAddress)
     await deployedBridge.initialize(config.treasuryAddress, config.wrapAndZapAddress, config.omnibridgeAddress, config.xdaibridgeAddress, config.daiAddress, config.wethAddress);
+    await deployedBridge.deployTransaction.wait(20)
 
     const plazeBridgeTemplate = await ethers.getContractFactory("PaymentBridge");
     console.log('Deploying bridge template...');
