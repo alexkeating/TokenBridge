@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 pragma solidity 0.8.6;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -11,6 +12,7 @@ import "./IWETH.sol";
 
 contract PaymentBridge is Initializable {
     using AddressUpgradeable for address;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
     
     /// @dev treasury address to send to for non-dai tokens
     address public treasuryAddress;
@@ -75,7 +77,7 @@ contract PaymentBridge is Initializable {
 
         IERC20Upgradeable _token = IERC20Upgradeable(_tokenAddress);
         if (msg.sender != address(this)) {
-            _token.transferFrom(msg.sender, address(this), _amount);
+            _token.safeTransferFrom(msg.sender, address(this), _amount);
         }
         if (_tokenAddress == daiAddress) {
             _approveBridge(_token, xdaibridgeAddress, _amount);
@@ -90,8 +92,13 @@ contract PaymentBridge is Initializable {
 
 
     function _approveBridge(IERC20Upgradeable _token, address _bridge, uint256 _amount) internal {
+         if (_token.allowance(address(this), _bridge) == 0) {
+             _token.safeApprove(_bridge, _amount);
+             return;
+         }
          if (_token.allowance(address(this), _bridge) < _amount) {
              _token.approve(_bridge, _amount);
+             return;
         } 
     }
 }
