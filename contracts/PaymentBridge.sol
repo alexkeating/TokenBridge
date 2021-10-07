@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "hardhat/console.sol";
 import "./IOmniBridge.sol";
 import "./IWETH.sol";
 
@@ -97,7 +96,7 @@ contract PaymentBridge is Initializable {
              return;
          }
          if (_token.allowance(address(this), _bridge) < _amount) {
-             _token.approve(_bridge, _amount);
+             _token.safeIncreaseAllowance(_bridge, _amount);
              return;
         } 
     }
