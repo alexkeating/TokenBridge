@@ -57,7 +57,11 @@ contract PaymentBridge is Initializable {
     }  
 
     function poke(uint256 _amount, address _tokenAddress) external payable {
-        _pay(_amount, _tokenAddress);      
+        IERC20Upgradeable token = IERC20Upgradeable(_tokenAddress);
+        uint256 balance = token.balanceOf(address(this));
+        if (balance != 0) {
+            _pay(_amount, _tokenAddress);      
+        }
     }
 
     function _pay(uint256 _amount, address _tokenAddress) internal {
@@ -93,5 +97,9 @@ contract PaymentBridge is Initializable {
          if (_token.allowance(address(this), _bridge) < _amount) {
              _token.approve(_bridge, _amount);
         } 
+    }
+
+    receive() external payable {
+        _pay(msg.value, address(0));
     }
 }
