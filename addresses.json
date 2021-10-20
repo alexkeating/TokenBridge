@@ -1,6 +1,6 @@
 {
     "kovan": {
-        "PaymentBridge": "0x89e98B51097Be6862B821ec9875538dA0B121DE6",
-        "PaymentBridgeFactory": "0x7d4A66CC9a35ba77BC2F800968FaC08E84e2CE6c"
+        "PaymentBridge": "0x1CF4EFf8947E614f01c8af20eEcCcB85E35a53D4",
+        "PaymentBridgeFactory": "0x1CF4EFf8947E614f01c8af20eEcCcB85E35a53D4"
     }
 }

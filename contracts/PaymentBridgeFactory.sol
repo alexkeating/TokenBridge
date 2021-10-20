@@ -14,6 +14,8 @@ contract PaymentBridgeFactory is Initializable {
     using AddressUpgradeable for address;
     using ClonesUpgradeable for address;
     // Methods
+    /// @dev admin address
+    address public admin;
     /// @dev fixed contract template for EIP-1167 Proxy pattern
     address public template;
     /// @dev address to send payment for creating a new bridge
@@ -27,20 +29,21 @@ contract PaymentBridgeFactory is Initializable {
     // init unchained
     /// @dev used to handle multiple inheritance in order to prevent
     /// calling parent intializers
-    function __PaymentBridgeFactory_init_unchained(address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
+    function __PaymentBridgeFactory_init_unchained(address _admin, address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
+        admin = _admin;
         template = _template;
         payeeBridge = payable(_payeeBridge);
         feeAmount = _feeAmount;
     }
     // init
     // @dev embeds linearized calls to all parent initializers
-    function __PaymentBridgeFactory_init(address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
-        __PaymentBridgeFactory_init_unchained(_template, _payeeBridge, _feeAmount);
+    function __PaymentBridgeFactory_init(address _admin, address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
+        __PaymentBridgeFactory_init_unchained(_admin, _template, _payeeBridge, _feeAmount);
     }
     // initialize
     /// @dev Initializes factory contract using a minimal proxy pattern (EIP-1167)
-    function initialize(address _template, address _payeeBridge, uint256 _feeAmount) public{
-        __PaymentBridgeFactory_init(_template, _payeeBridge, _feeAmount);
+    function initialize(address _admin, address _template, address _payeeBridge, uint256 _feeAmount) public{
+        __PaymentBridgeFactory_init(_admin, _template, _payeeBridge, _feeAmount);
     }
 
     
@@ -56,8 +59,7 @@ contract PaymentBridgeFactory is Initializable {
 
     function changeFee(uint256 _feeAmount) external {
         // TODO: fee should be set in USD, then converted used currency when createPaymentBridge is called
-        // TODO: check if sender is owner
-        // require(msg.sender == <gnosis address>, "PaymentBridgeFactory: Sender is not the admin");
+        require(msg.sender == admin, "PaymentBridgeFactory: Sender is not the admin");
         feeAmount = _feeAmount;
     }
 
@@ -71,6 +73,7 @@ contract PaymentBridgeFactory is Initializable {
     // create payment bridge
     function createPaymentBridge(bytes calldata _initData) external payable {
         require(template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
+        require(msg.sender == admin, "PaymentBridgeFactory: Sender is not the admin");
         // send money to payment bridge
         // TODO: does there need to be an approval above this
         PaymentBridge(payeeBridge).pay(feeAmount, address(0));
