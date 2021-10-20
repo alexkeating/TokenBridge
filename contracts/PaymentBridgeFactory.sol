@@ -54,6 +54,13 @@ contract PaymentBridgeFactory is Initializable {
         // require(bridge.initialized(), "PaymentBridgeFactory: is not initialized");
     }
 
+    function changeFee(uint256 _feeAmount) external {
+        // TODO: fee should be set in USD, then converted used currency when createPaymentBridge is called
+        // TODO: check if sender is owner
+        // require(msg.sender == <gnosis address>, "PaymentBridgeFactory: Sender is not the admin");
+        feeAmount = _feeAmount;
+    }
+
 
     // clone
     function clone(bytes calldata _initData) internal {
