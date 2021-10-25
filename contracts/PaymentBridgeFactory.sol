@@ -4,18 +4,17 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./PaymentBridge.sol";
 
 // Setup fee amount
 // Allow owner to modify fee amount
 // transfer fee amount when creating bridge
 
-contract PaymentBridgeFactory is Initializable {
+contract PaymentBridgeFactory is Initializable, Ownable {
     using AddressUpgradeable for address;
     using ClonesUpgradeable for address;
     // Methods
-    /// @dev admin address
-    address public admin;
     /// @dev fixed contract template for EIP-1167 Proxy pattern
     address public template;
     /// @dev address to send payment for creating a new bridge
@@ -30,7 +29,7 @@ contract PaymentBridgeFactory is Initializable {
     /// @dev used to handle multiple inheritance in order to prevent
     /// calling parent intializers
     function __PaymentBridgeFactory_init_unchained(address _admin, address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
-        admin = _admin;
+        transferOwnership(_admin);
         template = _template;
         payeeBridge = payable(_payeeBridge);
         feeAmount = _feeAmount;
@@ -57,9 +56,8 @@ contract PaymentBridgeFactory is Initializable {
         // require(bridge.initialized(), "PaymentBridgeFactory: is not initialized");
     }
 
-    function changeFee(uint256 _feeAmount) external {
+    function changeFee(uint256 _feeAmount) external onlyOwner {
         // TODO: fee should be set in USD, then converted used currency when createPaymentBridge is called
-        require(msg.sender == admin, "PaymentBridgeFactory: Sender is not the admin");
         feeAmount = _feeAmount;
     }
 
@@ -73,7 +71,6 @@ contract PaymentBridgeFactory is Initializable {
     // create payment bridge
     function createPaymentBridge(bytes calldata _initData) external payable {
         require(template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
-        require(msg.sender == admin, "PaymentBridgeFactory: Sender is not the admin");
         // send money to payment bridge
         // TODO: does there need to be an approval above this
         PaymentBridge(payeeBridge).pay(feeAmount, address(0));
