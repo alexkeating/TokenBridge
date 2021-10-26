@@ -7,12 +7,16 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IOmniBridge.sol";
 import "./IWETH.sol";
+import "hardhat/console.sol";
 
 
 contract PaymentBridge is Initializable {
     using AddressUpgradeable for address;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     
+    /// @dev flag the contract as initialized
+    bool public initialized;
+
     /// @dev treasury address to send to for non-dai tokens
     address public treasuryAddress;
     
@@ -41,8 +45,8 @@ contract PaymentBridge is Initializable {
         xdaibridgeAddress = _xdaibridgeAddress;
         daiAddress = _daiAddress;
         weth = IWETH(_wethAddress);
-        weth.approve(address(this), type(uint256).max);
-
+        weth.approve(omnibridgeAddress, type(uint256).max);
+        initialized = true;
     }
 
     function __PaymentBridge_init(address _treasuryAddress, address _wrapAndZap, address _omnibridgeAddress, address _xdaibridgeAddress, address _daiAddress, address _weth) internal initializer {
@@ -68,6 +72,8 @@ contract PaymentBridge is Initializable {
         }
         
         if (_tokenAddress == address(0)) {
+            console.log("Here");
+            console.log(address(weth));
             weth.deposit{ value: _amount }();
             IOminiBridge(omnibridgeAddress).relayTokens(address(weth), _recipientAddress, _amount);
             emit Payment(_tokenAddress, msg.sender, _recipientAddress, _amount);

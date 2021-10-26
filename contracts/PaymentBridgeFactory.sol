@@ -66,15 +66,9 @@ contract PaymentBridgeFactory is Initializable {
         require(template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
         // send money to payment bridge
         // TODO: does there need to be an approval above this
-        PaymentBridge(payeeBridge).pay(feeAmount, address(0));
+        // PaymentBridge(payeeBridge).pay(feeAmount, address(0));
         clone(_initData);
     }
-    // totalBridges
-    // bridges owned by
-
-    // Event
-    //
-    // New Bridge
 
     // _gap
     // This is empty reserved space in storage that is put in place in Upgradeable contracts.
