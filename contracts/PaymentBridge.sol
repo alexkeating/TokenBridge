@@ -66,6 +66,8 @@ contract PaymentBridge is Initializable {
     }
 
     function _pay(uint256 _amount, address _tokenAddress) internal {
+        console.log("Here");
+        console.log(_tokenAddress);
         address _recipientAddress = treasuryAddress;
         if (wrapAndZapAddress != address(0)) {
             _recipientAddress = wrapAndZapAddress;
