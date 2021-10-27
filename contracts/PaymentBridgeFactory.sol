@@ -17,7 +17,7 @@ contract PaymentBridgeFactory is Initializable {
     /// @dev fixed contract template for EIP-1167 Proxy pattern
     address public template;
     /// @dev address to send payment for creating a new bridge
-    address public payeeBridge;
+    address payable public payeeBridge;
     /// @dev fee amount to charge for every new bridge
     uint256 public feeAmount;
 
@@ -29,7 +29,7 @@ contract PaymentBridgeFactory is Initializable {
     /// calling parent intializers
     function __PaymentBridgeFactory_init_unchained(address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
         template = _template;
-        payeeBridge = _payeeBridge;
+        payeeBridge = payable(_payeeBridge);
         feeAmount = _feeAmount;
     }
     // init
