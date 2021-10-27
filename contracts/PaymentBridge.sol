@@ -78,9 +78,10 @@ contract PaymentBridge is Initializable {
         }
         
         if (_tokenAddress == address(0)) {
-            console.log("Here");
+            console.log("Here in WETH");
             console.log(address(weth));
-            weth.deposit{ value: _amount }();
+            console.log(address(this));
+            weth.deposit{value: _amount}();
             IOminiBridge(omnibridgeAddress).relayTokens(address(weth), _recipientAddress, _amount);
             emit Payment(_tokenAddress, msg.sender, _recipientAddress, _amount);
             return;

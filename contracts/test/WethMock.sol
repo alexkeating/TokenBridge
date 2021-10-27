@@ -17,21 +17,22 @@ contract WethMock is IWETH {
     mapping (address => uint256)                       public  balanceOf;
     mapping (address => mapping (address => uint256))  public  allowance;
 
-    receive() external payable {
-        this.deposit();
-    }
+    // receive() external payable {
+    //     this.deposit();
+    // }
     function deposit() override external payable {
         console.log("beer");
+        console.log(msg.sender);
         balanceOf[msg.sender] += msg.value;
     }
     function withdraw(uint wad) override public {
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
-        (bool sent, bytes memory data) = address(this).call{value: wad}("Depositing");
-        if (sent == false) {
-          revert("Eth send failed");
-        }
-        emit Withdrawal(msg.sender, wad);
+        // (bool sent, bytes memory data) = address(this).call{value: wad}("Depositing");
+        // if (sent == false) {
+        //   revert("Eth send failed");
+        // }
+        // emit Withdrawal(msg.sender, wad);
     }
 
     function totalSupply() public view returns (uint) {
