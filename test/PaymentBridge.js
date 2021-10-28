@@ -24,7 +24,7 @@ describe("PaymentBridge", () => {
     let bridgeOwner
     
     before(async () => {
-        [admin, alice, bob] = await ethers.getSigners();
+        [admin, alice, bob, greg] = await ethers.getSigners();
         const factory = await ethers.getContractFactory("PaymentBridgeFactory");
         paymentBridgeFactory = await factory.deploy();
         const plazaBridgeFactory = await ethers.getContractFactory("PaymentBridge");
@@ -73,7 +73,7 @@ describe("PaymentBridge", () => {
     it("Payment bridge is created", async function () {
         // put together calldata call create
         const initData = await bridgeTemplate.populateTransaction.initialize(alice.address, ethers.constants.AddressZero, omnibridge.address, xdaibridge.address, dai.address, weth.address)
-        const resp = await paymentBridgeFactory.createPaymentBridge(initData.data)
+        const resp = await paymentBridgeFactory.createPaymentBridge(initData.data, {value: 10})
         const receipt = await resp.wait()
 
         const [bridgeOwner, bridgeAddress] = receipt.events.find(e => e.event === 'NewPaymentBridge').args;
@@ -142,21 +142,49 @@ describe("PaymentBridge", () => {
     it("Pay Eth to bridge", async function () {
         const deployedBridge = new ethers.Contract(bridge, PaymentBridgeABI, alice);
         
-        const resp = await deployedBridge.pay(10, ethers.constants.AddressZero)
+        const resp = await deployedBridge.pay(10, ethers.constants.AddressZero, {value: 10})
         const receipt = await resp.wait()
         console.log(resp)
 
         // check omnibridge
-        // const balance = await usdc.balanceOf(omnibridge.address)
-        // expect(balance.toString()).to.equal("10")
+        const balance = await weth.balanceOf(omnibridge.address)
+        // 20 because 10 from payment for creating the bridge
+        expect(balance.toString()).to.equal("20")
 
-        // const bridgeBalance = await usdc.balanceOf(bridge)
-        // expect(bridgeBalance.toString()).to.equal("0")
-
-        // const aliceBalance = await usdc.balanceOf(alice.address)
-        // expect(aliceBalance.toString()).to.equal("99999999999999999990")
+        const bridgeBalance = await weth.balanceOf(bridge)
+        expect(bridgeBalance.toString()).to.equal("0")
       });
 
+    it("Poke stuck erc20", async function () {
+        const deployedBridge = new ethers.Contract(bridge, PaymentBridgeABI, admin);
+        await usdc.connect(alice).transfer(bridge, 10);
 
+        const balance = await usdc.balanceOf(bridge)
+        expect(balance.toString()).to.equal("10")
+        
+        const resp = await deployedBridge.poke(10, usdc.address)
+        const receipt = await resp.wait()
 
+        // check omnibridge
+        const omniBalance = await usdc.balanceOf(omnibridge.address)
+        expect(omniBalance.toString()).to.equal("20")
+
+        const bridgeBalance = await usdc.balanceOf(bridge)
+        expect(bridgeBalance.toString()).to.equal("0")
+
+        const aliceBalance = await usdc.balanceOf(alice.address)
+        expect(aliceBalance.toString()).to.equal("99999999999999999980")
+      });
+    it("Poke stuck erc20", async function () {
+        const transactionHash = await alice.sendTransaction({
+          to: bridge,
+          value: 10,
+        });
+        // check omnibridge
+        const balance = await weth.balanceOf(omnibridge.address)
+        expect(balance.toString()).to.equal("30")
+
+        const bridgeBalance = await weth.balanceOf(bridge)
+        expect(bridgeBalance.toString()).to.equal("0")
+      });
 })

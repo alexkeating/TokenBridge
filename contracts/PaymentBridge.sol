@@ -58,38 +58,34 @@ contract PaymentBridge is Initializable {
     }
 
     function pay(uint256 _amount, address _tokenAddress) external payable {
-        _pay(_amount, _tokenAddress);
+        _pay(_amount, _tokenAddress, msg.sender);
     }  
 
     function poke(uint256 _amount, address _tokenAddress) external payable {
         IERC20Upgradeable token = IERC20Upgradeable(_tokenAddress);
         uint256 balance = token.balanceOf(address(this));
         if (balance != 0) {
-            _pay(_amount, _tokenAddress);      
+            _pay(_amount, _tokenAddress, address(this));      
         }
     }
 
-    function _pay(uint256 _amount, address _tokenAddress) internal {
-        console.log("Here");
-        console.log(_tokenAddress);
+    function _pay(uint256 _amount, address _tokenAddress, address sender) internal {
         address _recipientAddress = treasuryAddress;
         if (wrapAndZapAddress != address(0)) {
             _recipientAddress = wrapAndZapAddress;
         }
         
         if (_tokenAddress == address(0)) {
-            console.log("Here in WETH");
-            console.log(address(weth));
-            console.log(address(this));
+            require(_amount == msg.value, "msg.value does not equal passed in amount");
             weth.deposit{value: _amount}();
             IOminiBridge(omnibridgeAddress).relayTokens(address(weth), _recipientAddress, _amount);
-            emit Payment(_tokenAddress, msg.sender, _recipientAddress, _amount);
+            emit Payment(_tokenAddress, sender, _recipientAddress, _amount);
             return;
         }
 
         IERC20Upgradeable _token = IERC20Upgradeable(_tokenAddress);
-        if (msg.sender != address(this)) {
-            _token.safeTransferFrom(msg.sender, address(this), _amount);
+        if (sender != address(this)) {
+            _token.safeTransferFrom(sender, address(this), _amount);
         }
         if (_tokenAddress == daiAddress) {
             _approveBridge(_token, xdaibridgeAddress, _amount);
@@ -99,7 +95,7 @@ contract PaymentBridge is Initializable {
             _approveBridge(_token, omnibridgeAddress, _amount);
             IOminiBridge(omnibridgeAddress).relayTokens(_tokenAddress, _recipientAddress, _amount);
         }
-        emit Payment(_tokenAddress, msg.sender, _recipientAddress, _amount);
+        emit Payment(_tokenAddress, sender, _recipientAddress, _amount);
     }
 
 
@@ -115,6 +111,6 @@ contract PaymentBridge is Initializable {
     }
 
     receive() external payable {
-        _pay(msg.value, address(0));
+        _pay(msg.value, address(0), address(this));
     }
 }
