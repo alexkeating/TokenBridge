@@ -3,7 +3,6 @@ pragma solidity ^0.8.6;
 
 // ERC20 inherit erc20 
 import "../IWETH.sol";
-import "hardhat/console.sol";
 
 contract WethMock is IWETH {
     string public name     = "Wrapped Ether";
@@ -21,8 +20,6 @@ contract WethMock is IWETH {
     //     this.deposit();
     // }
     function deposit() override external payable {
-        console.log("beer");
-        console.log(msg.sender);
         balanceOf[msg.sender] += msg.value;
     }
     function withdraw(uint wad) override public {

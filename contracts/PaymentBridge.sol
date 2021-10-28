@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IOmniBridge.sol";
 import "./IWETH.sol";
-import "hardhat/console.sol";
 
 
 contract PaymentBridge is Initializable {

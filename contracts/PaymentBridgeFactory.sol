@@ -32,6 +32,7 @@ contract PaymentBridgeFactory is Initializable {
         payeeBridge = payable(_payeeBridge);
         feeAmount = _feeAmount;
     }
+
     // init
     // @dev embeds linearized calls to all parent initializers
     function __PaymentBridgeFactory_init(address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
@@ -64,8 +65,6 @@ contract PaymentBridgeFactory is Initializable {
     // create payment bridge
     function createPaymentBridge(bytes calldata _initData) external payable {
         require(template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
-        // send money to payment bridge
-        // TODO: does there need to be an approval above this
         PaymentBridge(payeeBridge).pay{value: feeAmount}(feeAmount, address(0));
         clone(_initData);
     }

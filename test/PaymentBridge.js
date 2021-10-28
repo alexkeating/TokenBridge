@@ -1,13 +1,6 @@
 const { expect } = require("chai");
 const PaymentBridgeABI = require("../artifacts/contracts/PaymentBridge.sol/PaymentBridge.json").abi;
 const WethMock = require("../artifacts/contracts/test/WethMock.sol/WethMock.json").abi;
-// Test cases
-//
-// 1. Make sure payee, feeAmount, template are set
-// 2. Make sure fee can be updated
-// 3. Make sure Pay goes to the bridge
-// 4. Make sure poke releases stuck funds
-// 5. Make sure receive sends to correct bridge
 
 describe("PaymentBridge", () => {
     let dai;
@@ -69,9 +62,7 @@ describe("PaymentBridge", () => {
         expect(await paymentBridgeFactory.feeAmount()).to.equal(10);
       });
 
-    // TODO: It may rever because the account has no eth
     it("Payment bridge is created", async function () {
-        // put together calldata call create
         const initData = await bridgeTemplate.populateTransaction.initialize(alice.address, ethers.constants.AddressZero, omnibridge.address, xdaibridge.address, dai.address, weth.address)
         const resp = await paymentBridgeFactory.createPaymentBridge(initData.data, {value: 10})
         const receipt = await resp.wait()
@@ -98,19 +89,12 @@ describe("PaymentBridge", () => {
       });
 
     it("Pay DAI on bridge", async function () {
-        // Make sure alice has DAI
-        // Pay DAI
-        // Make sure the payment bridge has approval
-        // Make sure there is DAI in the mock omnibridge 
-        // Everything is set properly
-        console.log(bridge)
-        console.log("Bridge")
         const deployedBridge = new ethers.Contract(bridge, PaymentBridgeABI, alice);
         await dai.connect(alice).approve(bridge, 10);
         
         const resp = await deployedBridge.pay(10, dai.address)
         const receipt = await resp.wait()
-        // check omnibridge
+
         const balance = await dai.balanceOf(xdaibridge.address)
         expect(balance.toString()).to.equal("10")
 
@@ -128,7 +112,6 @@ describe("PaymentBridge", () => {
         const resp = await deployedBridge.pay(10, usdc.address)
         const receipt = await resp.wait()
 
-        // check omnibridge
         const balance = await usdc.balanceOf(omnibridge.address)
         expect(balance.toString()).to.equal("10")
 
@@ -144,11 +127,8 @@ describe("PaymentBridge", () => {
         
         const resp = await deployedBridge.pay(10, ethers.constants.AddressZero, {value: 10})
         const receipt = await resp.wait()
-        console.log(resp)
 
-        // check omnibridge
         const balance = await weth.balanceOf(omnibridge.address)
-        // 20 because 10 from payment for creating the bridge
         expect(balance.toString()).to.equal("20")
 
         const bridgeBalance = await weth.balanceOf(bridge)
@@ -165,7 +145,6 @@ describe("PaymentBridge", () => {
         const resp = await deployedBridge.poke(10, usdc.address)
         const receipt = await resp.wait()
 
-        // check omnibridge
         const omniBalance = await usdc.balanceOf(omnibridge.address)
         expect(omniBalance.toString()).to.equal("20")
 
@@ -180,7 +159,6 @@ describe("PaymentBridge", () => {
           to: bridge,
           value: 10,
         });
-        // check omnibridge
         const balance = await weth.balanceOf(omnibridge.address)
         expect(balance.toString()).to.equal("30")
 
