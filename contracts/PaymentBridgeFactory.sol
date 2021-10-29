@@ -28,6 +28,7 @@ contract PaymentBridgeFactory is Initializable {
     /// @dev used to handle multiple inheritance in order to prevent
     /// calling parent intializers
     function __PaymentBridgeFactory_init_unchained(address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
+        require(_template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
         template = _template;
         payeeBridge = payable(_payeeBridge);
         feeAmount = _feeAmount;
@@ -48,11 +49,8 @@ contract PaymentBridgeFactory is Initializable {
     // _initAndEmit - will house payment logic
     function _initAndEmit(address _instance, address sender, bytes calldata _initData) private {
         emit NewPaymentBridge(sender, _instance);
-        if (_initData.length > 0) {
-            _instance.functionCall(_initData);
-        }
-        // PaymentBridge bridge = PaymentBridge(_instance);
-        // require(bridge.initialized(), "PaymentBridgeFactory: is not initialized");
+        require(_initData.length > 0, "PaymentBridgeFactory initData calldata is empty");
+        _instance.functionCall(_initData);
     }
 
 
@@ -64,7 +62,6 @@ contract PaymentBridgeFactory is Initializable {
 
     // create payment bridge
     function createPaymentBridge(bytes calldata _initData) external payable {
-        require(template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
         PaymentBridge(payeeBridge).pay{value: feeAmount}(feeAmount, address(0));
         clone(_initData);
     }

@@ -61,6 +61,17 @@ describe("PaymentBridge", () => {
         expect(await paymentBridgeFactory.payeeBridge()).to.equal(plazaBridge.address);
         expect(await paymentBridgeFactory.feeAmount()).to.equal(10);
       });
+    
+    it("Create with 0 address", async () => {
+        const factory = await ethers.getContractFactory("PaymentBridgeFactory");
+        const deployedFactory = await factory.deploy();
+        await expect(deployedFactory.initialize(ethers.constants.AddressZero, plazaBridge.address, 10)).to.be.revertedWith("PaymentBridgeFactory: Missing PaymentBridge Template");
+    })
+
+    it("Create with no calldata", async () => {
+        const initData = []
+        await expect(paymentBridgeFactory.createPaymentBridge(initData, {value: 10})).to.be.revertedWith("PaymentBridgeFactory initData calldata is empty")
+    })
 
     it("Payment bridge is created", async function () {
         const initData = await bridgeTemplate.populateTransaction.initialize(alice.address, ethers.constants.AddressZero, omnibridge.address, xdaibridge.address, dai.address, weth.address)
@@ -135,6 +146,11 @@ describe("PaymentBridge", () => {
         expect(bridgeBalance.toString()).to.equal("0")
       });
 
+    it("Pay Eth to bridge value wrong", async function () {
+        const deployedBridge = new ethers.Contract(bridge, PaymentBridgeABI, alice);
+        await expect(deployedBridge.pay(15, ethers.constants.AddressZero, {value: 10})).to.be.revertedWith("msg.value does not equal passed in amount")
+      });
+
     it("Poke stuck erc20", async function () {
         const deployedBridge = new ethers.Contract(bridge, PaymentBridgeABI, admin);
         await usdc.connect(alice).transfer(bridge, 10);
@@ -163,6 +179,21 @@ describe("PaymentBridge", () => {
         expect(balance.toString()).to.equal("30")
 
         const bridgeBalance = await weth.balanceOf(bridge)
+        expect(bridgeBalance.toString()).to.equal("0")
+      });
+
+    it("Poke  0 balance", async function () {
+        const deployedBridge = new ethers.Contract(bridge, PaymentBridgeABI, admin);
+        const preBalance = await usdc.balanceOf(bridge)
+        expect(preBalance.toString()).to.equal("0")
+
+
+        const resp = await deployedBridge.poke(10, usdc.address)
+        const receipt = await resp.wait()
+        const omniBalance = await usdc.balanceOf(omnibridge.address)
+        expect(omniBalance.toString()).to.equal("20")
+
+        const bridgeBalance = await usdc.balanceOf(bridge)
         expect(bridgeBalance.toString()).to.equal("0")
       });
 

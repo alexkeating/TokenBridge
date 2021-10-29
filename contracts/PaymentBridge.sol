@@ -99,10 +99,7 @@ contract PaymentBridge is Initializable {
 
 
     function _approveBridge(IERC20Upgradeable _token, address _bridge, uint256 _amount) internal {
-         if (_token.allowance(address(this), _bridge) == 0) {
-             _token.safeApprove(_bridge, _amount);
-             return;
-         }
+        _token.safeApprove(_bridge, _amount);
     }
 
     receive() external payable {
