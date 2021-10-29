@@ -154,7 +154,7 @@ describe("PaymentBridge", () => {
         const aliceBalance = await usdc.balanceOf(alice.address)
         expect(aliceBalance.toString()).to.equal("99999999999999999980")
       });
-    it("Poke stuck erc20", async function () {
+    it("Poke stuck weth", async function () {
         const transactionHash = await alice.sendTransaction({
           to: bridge,
           value: 10,
@@ -164,5 +164,21 @@ describe("PaymentBridge", () => {
 
         const bridgeBalance = await weth.balanceOf(bridge)
         expect(bridgeBalance.toString()).to.equal("0")
+      });
+
+      it("Payment bridge is created with wrapNZap", async function () {
+        const initData = await bridgeTemplate.populateTransaction.initialize(alice.address, admin.address, omnibridge.address, xdaibridge.address, dai.address, weth.address)
+        const resp = await paymentBridgeFactory.createPaymentBridge(initData.data, {value: 10})
+        const receipt = await resp.wait()
+
+        const [bridgeOwner, bridgeAddress] = receipt.events.find(e => e.event === 'NewPaymentBridge').args;
+        expect(bridgeOwner).to.equal(admin.address);
+
+        // Everything is set properly
+        const deployedBridge = new ethers.Contract(bridgeAddress, PaymentBridgeABI, alice);
+        await deployedBridge.pay(10, ethers.constants.AddressZero, {value: 10})
+
+        const receiver = await omnibridge.receiver()
+        expect(receiver).to.equal(admin.address)
       });
 })

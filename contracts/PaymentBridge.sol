@@ -53,7 +53,7 @@ contract PaymentBridge is Initializable {
     }
 
     function initialize(address _treasuryAddress, address _wrapAndZap, address _omnibridgeAddress, address _xdaibridgeAddress, address _daiAddress, address _weth) public {
-        __PaymentBridge_init_unchained(_treasuryAddress, _wrapAndZap, _omnibridgeAddress, _xdaibridgeAddress, _daiAddress, _weth);
+        __PaymentBridge_init(_treasuryAddress, _wrapAndZap, _omnibridgeAddress, _xdaibridgeAddress, _daiAddress, _weth);
     }
 
     function pay(uint256 _amount, address _tokenAddress) external payable {
@@ -103,10 +103,6 @@ contract PaymentBridge is Initializable {
              _token.safeApprove(_bridge, _amount);
              return;
          }
-         if (_token.allowance(address(this), _bridge) < _amount) {
-             _token.safeIncreaseAllowance(_bridge, _amount);
-             return;
-        } 
     }
 
     receive() external payable {
