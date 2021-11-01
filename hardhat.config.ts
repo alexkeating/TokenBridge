@@ -72,6 +72,7 @@ const config: HardhatUserConfig = {
       },
       chainId: chainIds.hardhat,
       tags: ["test"],
+      initialBaseFeePerGas: 0,
     },
     goerli: {
       accounts: {
