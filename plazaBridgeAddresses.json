@@ -6,6 +6,7 @@
         "xdaibridgeAddress": ""
     },
     "kovan": {
+        "adminAddress": "",
         "daiAddress": "0x40a81c34f36ebe2d98bac578d66d3ee952a48f24",
         "wethAddress": "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
         "omnibridgeAddress": "0xA960d095470f7509955d5402e36d9DB984B5C8E2",
@@ -14,6 +15,7 @@
         "wrapAndZapAddress": "0x2436012a54c81f2F03e6E3D83090f3F5967bF1B5"
     },
     "hardhat": {
+        "adminAddress": "",
         "daiAddress": "0x40a81c34f36ebe2d98bac578d66d3ee952a48f24",
         "wethAddress": "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
         "omnibridgeAddress": "0xA960d095470f7509955d5402e36d9DB984B5C8E2",

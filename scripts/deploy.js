@@ -30,7 +30,7 @@ const main = async () => {
     console.log('Deploying bridge factory...');
     const deployedFactory = await plazaBridgeFactory.deploy()
     console.log('Intializing bridge factory...');
-    await deployedFactory.initialize(deployedTemplate.address, deployedBridge.address, 100)
+    await deployedFactory.initialize(config.adminAddress, deployedTemplate.address, deployedBridge.address, 100)
 
     console.log('Finishing deployment...');
     const json = fs.readFileSync(ADDRESSES_FILE);
