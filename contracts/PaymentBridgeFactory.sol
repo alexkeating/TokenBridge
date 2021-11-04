@@ -30,6 +30,7 @@ contract PaymentBridgeFactory is Initializable, Ownable {
     /// calling parent intializers
     function __PaymentBridgeFactory_init_unchained(address _admin, address _template, address _payeeBridge, uint256 _feeAmount) internal initializer {
         require(_template != address(0), "PaymentBridgeFactory: Missing PaymentBridge Template");
+        require(_admin != address(0), "PaymentBridgeFactory: Missing admin address");
         transferOwnership(_admin);
         template = _template;
         payeeBridge = payable(_payeeBridge);

@@ -11,6 +11,7 @@ describe("PaymentBridge", () => {
     let plazaBridge;
     let bridgeTemplate;
     let paymentBridgeFactory;
+    let admin
     let alice;
     let bob;
     let bridge
@@ -56,16 +57,36 @@ describe("PaymentBridge", () => {
  
     })
     it("Make sure contract variables are set", async function () {
-        await paymentBridgeFactory.initialize(bridgeTemplate.address, plazaBridge.address, 10);
+        await paymentBridgeFactory.initialize(admin.address, bridgeTemplate.address, plazaBridge.address, 10);
         expect(await paymentBridgeFactory.template()).to.equal(bridgeTemplate.address);
         expect(await paymentBridgeFactory.payeeBridge()).to.equal(plazaBridge.address);
         expect(await paymentBridgeFactory.feeAmount()).to.equal(10);
       });
     
-    it("Create with 0 address", async () => {
+    it("Create with 0 address template", async () => {
         const factory = await ethers.getContractFactory("PaymentBridgeFactory");
         const deployedFactory = await factory.deploy();
-        await expect(deployedFactory.initialize(ethers.constants.AddressZero, plazaBridge.address, 10)).to.be.revertedWith("PaymentBridgeFactory: Missing PaymentBridge Template");
+        await expect(deployedFactory.initialize(admin.address, ethers.constants.AddressZero, plazaBridge.address, 10)).to.be.revertedWith("PaymentBridgeFactory: Missing PaymentBridge Template");
+    })
+
+    it("Create with 0 address admin", async () => {
+      const factory = await ethers.getContractFactory("PaymentBridgeFactory");
+      const deployedFactory = await factory.deploy();
+      await expect(deployedFactory.initialize(ethers.constants.AddressZero, bridgeTemplate.address, plazaBridge.address, 10)).to.be.revertedWith("PaymentBridgeFactory: Missing admin address");
+    })
+
+    it("Changes fee", async () => {
+      const factory = await ethers.getContractFactory("PaymentBridgeFactory");
+      const deployedFactory = await factory.deploy();
+      await deployedFactory.changeFee(100);
+      const fee = await deployedFactory.feeAmount();
+      expect(fee.toString()).to.equal('100');
+    })
+
+    it("Changes fee as non-admin", async () => {
+      const factory = await ethers.getContractFactory("PaymentBridgeFactory");
+      const deployedFactory = await factory.deploy();
+      await expect(deployedFactory.connect(alice).changeFee(100)).to.be.revertedWith("Ownable: caller is not the owner");
     })
 
     it("Create with no calldata", async () => {
