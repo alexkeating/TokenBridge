@@ -13,31 +13,36 @@ contract PaymentBridge is Initializable {
     using AddressUpgradeable for address;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     
-    /// @dev flag the contract as initialized
+    /// @dev flag the contract is initialized
     bool public initialized;
 
     /// @dev treasury address to send to for non-dai tokens
     address public treasuryAddress;
     
-    /// @dev wrapAndZap address for Moloch Daos on xdai
+    /// @dev wrapAndZap address for Moloch Daos on xdai to send DAI
     address public wrapAndZapAddress;
 
-    /// @dev Omnibridge address 
+    /// @dev Omnibridge address used to bridge ERC-20 tokens
     address public omnibridgeAddress;
 
-    /// @dev xdaibridge address
+    /// @dev xdaibridge address used to bridge DAI
     address public xdaibridgeAddress;
 
-    /// @dev dai address
+    /// @dev dai address on Mainnet
     address public daiAddress;
 
-    /// @dev weth address
+    /// @dev weth address on mainnet
     IWETH public weth;
 
     /// @dev event fired when a new payment bridge is created
     event Payment(address indexed token, address indexed payer, address indexed recipient, uint256 amount);
 
     function __PaymentBridge_init_unchained(address _treasuryAddress, address _wrapAndZap, address _omnibridgeAddress, address _xdaibridgeAddress, address _daiAddress, address _wethAddress) internal initializer{
+        require(_treasuryAddress != address(0), "No treasury address specified");
+        require(_omnibridgeAddress != address(0), "No omnibridge address specified");
+        require(_xdaibridgeAddress != address(0), "No xdaibridge address specified");
+        require(_daiAddress != address(0), "No DAI address specified");
+        require(_wethAddress != address(0), "No WETH address specified");
         treasuryAddress = _treasuryAddress;
         wrapAndZapAddress = _wrapAndZap;
         omnibridgeAddress = _omnibridgeAddress;
@@ -52,14 +57,17 @@ contract PaymentBridge is Initializable {
         __PaymentBridge_init_unchained(_treasuryAddress, _wrapAndZap, _omnibridgeAddress, _xdaibridgeAddress, _daiAddress, _weth);
     }
 
+    // @notice intializes payment bridge with appropriate variables
     function initialize(address _treasuryAddress, address _wrapAndZap, address _omnibridgeAddress, address _xdaibridgeAddress, address _daiAddress, address _weth) public {
         __PaymentBridge_init(_treasuryAddress, _wrapAndZap, _omnibridgeAddress, _xdaibridgeAddress, _daiAddress, _weth);
     }
 
+    // @notice sends payment tokens from mainnet to XDAI
     function pay(uint256 _amount, address _tokenAddress) external payable {
         _pay(_amount, _tokenAddress, msg.sender);
     }  
 
+    // @notice sends payment to payment bridge if payment gets stuck
     function poke(uint256 _amount, address _tokenAddress) external payable {
         IERC20Upgradeable token = IERC20Upgradeable(_tokenAddress);
         uint256 balance = token.balanceOf(address(this));
@@ -92,7 +100,7 @@ contract PaymentBridge is Initializable {
         } else {
             // Does passing the ERC 20 directly work?
             _approveBridge(_token, omnibridgeAddress, _amount);
-            IOminiBridge(omnibridgeAddress).relayTokens(_tokenAddress, _recipientAddress, _amount);
+            IOminiBridge(omnibridgeAddress).relayTokens(_tokenAddress, treasuryAddress, _amount);
         }
         emit Payment(_tokenAddress, sender, _recipientAddress, _amount);
     }
@@ -102,6 +110,8 @@ contract PaymentBridge is Initializable {
         _token.safeApprove(_bridge, _amount);
     }
 
+   
+    // Sends ETH to XDAI tresury if send directly to the payment bridge
     receive() external payable {
         _pay(msg.value, address(0), address(this));
     }
